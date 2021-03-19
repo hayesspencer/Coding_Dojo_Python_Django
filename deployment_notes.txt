@@ -1,0 +1,167 @@
+Deployment Cheat Sheet:
+
+============
+| On Local |
+============
+Go to project directory...
+	1. Get pip list:
+
+    		pip freeze > requirements.txt
+
+	2. Create .gitignore file:
+
+		touch .gitignore
+
+	3. Open .gitignore file and add:
+
+   		*.pyc
+    		venv/
+
+	4. Initialize repo:
+    
+		git init
+    		git add --all
+    		git commit -m "initial commit"
+
+	5. Create new github repo (on GitHub.com):
+
+    		git remote add origin [URL]
+    		git push origin master
+
+Assuming you have Amazon AWS server instance created...
+	
+	6. Go to directory that has your PEM key and using Git Bash...
+		
+		chmod 400 codingdojo_pem.pem
+		ssh -i "codingdojo_pem.pem" ubuntu@ec2-35-162-188-54.us-west-2.compute.amazonaws.com
+
+
+==================
+| SERVER CONFIG: |
+==================
+	1. Install Python, pip, virtualenv, etc.
+
+		ubuntu@54.162.31.253:~$ sudo apt-get update
+		ubuntu@54.162.31.253:~$ sudo apt-get install python-pip python-dev nginx git
+		ubuntu@54.162.31.253:~$ sudo apt-get update
+		ubuntu@54.162.31.253:~$ sudo pip install virtualenv
+
+	2. GIT CLONE the repo:
+
+		ubuntu@ip-my-ip:~$ git clone https://github.com/AnnaBNana/courses.git
+
+	3. Go into cloned repo and create virtual environment:
+
+		ubuntu@54.162.31.253:~/myRepoName$ virtualenv venv
+
+	4. Activate virtual env:
+
+		ubuntu@54.162.31.253:~/myRepoName$ source venv/bin/activate
+
+	5. Install additional requirements:
+
+		(venv) ubuntu@54.162.31.253:~/myRepoName$ pip install -r requirements.txt
+		(venv) ubuntu@54.162.31.253:~/myRepoName$ pip install django bcrypt django-extensions
+		(venv) ubuntu@54.162.31.253:~/myRepoName$ pip install gunicorn
+
+	6. Edit SETTINGS.PY:
+
+		(venv) ubuntu@54.162.31.253:~/myRepoName$ cd {{projectName}}
+		(venv) ubuntu@54.162.31.253:~/myRepoName/projectName$ sudo vim settings.py
+
+		Add/Edit the following lines:
+
+			DEBUG = False
+			ALLOWED_HOSTS = ['{{yourEC2.public.ip}}']
+			STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+	
+	7. Go back to directory with manage.py and run:
+
+		(venv) ubuntu@54.162.31.253:~myRepoName$ python manage.py collectstatic #say yes
+
+	8. Deactivate virtual env (unless you want to test Gunicorn below).
+
+----GUNICORN----
+	
+	9. Test Gunicorn...
+		
+		(venv) ubuntu@54.162.31.253:~myRepoName$ gunicorn --bind 0.0.0.0:8000 {{projectName}}.wsgi:application
+		
+		Expected output (ctrl+c to exit):
+
+	[2016-12-27 05:45:56 +0000] [8695] [INFO] Starting gunicorn 19.6.0
+	[2016-12-27 05:45:56 +0000] [8695] [INFO] Listening at: http://0.0.0.0:8000 (8695)
+	[2016-12-27 05:45:56 +0000] [8695] [INFO] Using worker: sync
+	[2016-12-27 05:45:56 +0000] [8700] [INFO] Booting worker with pid: 8700
+
+	10. Modify gunicorn.service file
+
+		ubuntu@54.162.31.253:~myRepoName$ sudo vim /etc/systemd/system/gunicorn.service
+
+		COPY-PASTA:
+
+[Unit]
+Description=gunicorn daemon
+After=network.target
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/{{repoName}}
+ExecStart=/home/ubuntu/{{repoName}}/venv/bin/gunicorn --workers 3 --bind unix:/home/ubuntu/{{repoName}}/{{projectName}}.sock {{projectName}}.wsgi:application
+[Install]
+WantedBy=multi-user.target
+
+	11. Enable the Gunicorn service (socket file should be created in the directory):
+
+		ubuntu@54.162.31.253:~$ sudo systemctl daemon-reload
+		ubuntu@54.162.31.253:~$ sudo systemctl start gunicorn
+		ubuntu@54.162.31.253:~$ sudo systemctl enable gunicorn
+
+----NGINX----
+
+	12. Edit nginx file:
+
+		ubuntu@54.162.31.253:~$ sudo vim /etc/nginx/sites-available/{{projectName}}
+
+		COPY-PASTA:
+
+server {
+  listen 80;
+  server_name {{yourPublicIP}};
+  location = /favicon.ico { access_log off; log_not_found off; }
+  location /static/ {
+      root /home/ubuntu/{{myRepoName}};
+  }
+  location / {
+      include proxy_params;
+      proxy_pass http://unix:/home/ubuntu/{{myRepoName}}/{{projectName}}.sock;
+  }
+}
+
+	13. Create link from sites available to sites enabled and test nginx file:
+
+		ubuntu@54.162.31.253:~$ sudo ln -s /etc/nginx/sites-available/{{projectName}} /etc/nginx/sites-enabled
+		ubuntu@54.162.31.253:~$ sudo nginx -t
+
+	14. Remove Nginx default site from sites enabled (if exists):
+
+		ubuntu@54.162.31.253:~$ sudo rm /etc/nginx/sites-enabled/default
+
+	15. Restart Nginx server:
+
+		54.162.31.253:~$ sudo service nginx restart
+
+
+
+______________________________________________
+APPENDIX:
+	* VIM commands to remember:
+		+ press 'i' to enter INSERT mode
+		+ press 'esc' to exit INSERT mode
+		+ ':' to enter vim command interface
+		+ 'wq' to save and quit
+		+ 'q!' to quit without saving
+		+ 'w' to save without quitting
+
+ubuntu@54.162.31.253:~$ sudo rm /etc/nginx/sites-enabled/default
+54.162.31.253:~$ sudo service nginx restart

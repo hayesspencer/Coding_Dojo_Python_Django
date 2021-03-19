@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Display Time</title>
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'style.css' %}" media="screen" title="no title"  charset="utf-8">
+</head>
+<body>
+<div id='box'>
+<div id='info'><p>The current time and date:</p></div>
+<!-- To get the value of a key in a dictionary from django, just supply the key name itself -->
+<div id='time'><p id='date'>{{date}}</p><p>{{time}}</p></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,737 @@
+=======
+| MVC |
+=======
+
+MVC (Model-View-Controller) architecture is a way of organizing code to help create robust web applications.
+Most ALL enterprise level web applications are built using an MVC framework, and it's CRITICAL that you
+understand how to build your web application using one.
+
+===========
+| Intro 1 |
+===========
+
+Flask example:
+    @app.route('/', methods = ['GET', 'POST'])
+    def index():
+      return render_template('index.html')
+
+Django example:
+    from django.conf.urls import url
+    from . import views
+    urlpatterns = [
+        url(r'^$', views.index),
+    ]
+
+urlpatterns list is most important from urls.py file. Django uses regex to match routes.
+First pattern (r'^$') is the equivalent of '/'.
+
+Much like in Flask, the pages that are going to be rendered are found in the templates folder.
+In general, we actually put a secondary folder inside the templates folder with the name of our app.
+Putting our pages that get rendered inside a secondary folder helps us organize our code as we use/build
+more and more apps.
+
+Controller methods generally:
+    * Redirect to other routes
+    * Render specific templates
+    * Invoke methods attached to other places of our app that we characterize as models
+
+===================
+| Getting Started |
+===================
+
+1. Navigate to location where you want to create your project.
+        django-admin startproject main
+    This will create the main project for us, from which we're going to make a few small set-up things
+    before we can really get going.
+2. Navigate to main directory that you just created. Create directory, "apps". Go into the apps directory.
+3. Create an __init__.py file.
+4. Create new app by running:
+        python ../manage.py startapp first_app
+5. Add "apps.first_app" to INSTALLED_APPS list in the /main/settings.py file.
+6. Open main/urls.py in text editor and tell it to get routes from first_app.
+7. Create urls.py file in first_app.
+----------IF YOU RUN THE SERVER NOW... THIS IS THE MESSAGE THAT YOU WILL SEE---------
+    raise ImproperlyConfigured(msg.format(name=self.urlconf_name))
+    django.core.exceptions.ImproperlyConfigured: The included URLconf '<module 'apps.first_app.urls' from
+    'C:\Users\UC\Desktop\DojoAssignments\Python\Django\main\apps\first_app\urls.py'>' does not appear to
+    have any patterns in it. If you see valid patterns in the file then the issue is probably caused by a
+    circular import.
+--------------------------------------------------------------------------------------
+Once an HTTP request is made, the routing file (urls.py) decides which controller/method runs.
+
+==========================
+| apps/first_app/urls.py |
+==========================
+Example of urls.py file that is modularized.
+        from django.conf.urls import url
+        from . import views           # This line is new!
+        urlpatterns = [
+          url(r'^$', views.index)     # This line has changed!
+        ]
+
+Breaking it down:
+    * from django.conf.urls import url
+        This gives us access to the variable url (which points to a function)
+    * from . import views
+        This gives us access to everything in a views.py file that Django automatically created for us
+        when we built our first_app.
+    * url(r'^$', views.index)
+        * Uses the url method in a way that's similar to the @app.route method in flask. The r after the ( identifies
+        the following string to match as a regular expression pattern.
+        * In this case, it will exactly match an empty string. That means if you were to go to localhost:8000/,
+        Django (after removing the '/' automatically) will check if anything matches.
+        * In this case, it does! An empty string is what r'^$' looks for. Since the pattern matches, we run the
+        views.index method.
+        * url() will eventually take another parameter, something like name='index', which we'll introduce when
+        we talk about named routes.
+
+===========================
+| apps/first_app/views.py |
+===========================
+
+Example:
+        from django.shortcuts import render, HttpResponse
+        # Create your views here.
+        def index(request):
+          response = "Hello, I am your first request!"
+          return HttpResponse(response)
+
+While Django automatically creates the request object for us that's passed into our method. HttpResponse objects
+are our responsibility to create and return to the browser. Note that 'render' is a shortcut method that combines
+a given template with a given context dictionary and returns an HttpResponse object with that rendered text.
+We aren't using render because we haven't created any templates yet.
+
+========================
+| REAL VIEWS OF DJANGO |
+========================
+
+********* REMEMBER *********
+    + Django Models is MODEL in MVC
+    + Django Templates (living in templates directory) is the VIEW in MVC
+    + Django Views (living in views.py) is the CONTROLLER in MVC
+
+Role of:
+    * Model: Performs heavy logic, queries database
+    * Template: Holds HTML (plus any Python code) that will be rendered and sent to browser
+    * View: Receives an HTTP request from routes.py and decides what to do (i.e. redirect,
+        call a model method, render some HTML)
+
+================
+| Static files |
+================
+
+In our views file, Django knows to look in the templates folder first for whatever path we pass to our render
+method.
+
+Example:
+        # views.py
+         ...
+         def index(request):
+           return render(request, "ourApp/index.html")
+
+Behavior for static files is similar: Django's template rendering system knows to look in the static and
+then at the path for the specific file relative to that folder.
+
+What HTML looks like:
+        <!DOCTYPE html>
+         <html>
+           <head>
+             <meta charset="utf-8">
+             <title></title>
+               {% load staticfiles %}
+             <!-- The line above tells Django to be ready to listen for static files -->
+             <link rel="stylesheet" href="{% static 'ourApp/css/main.css' %}"media="screen" title="no title"  charset="utf-8">
+             </head>
+           <body>
+           </body>
+         </html>
+
+========================
+| Session Data & Forms |
+========================
+Key Terms:
+    * request.POST
+        - Data from POST request
+    * request.GET
+        - Data from GET request
+    * request.method
+        - Returns the method/HTTP verb associated with the request
+    * {% csrf_token %}
+        - Prevents cross-site request forgery (place it in a form on the HTML/template sdie of your project)
+
+Set up to use session:
+In terminal, go to where manage.py is...
+        python manage.py makemigrations
+        python manage.py migrate
+
+Use session: request.session # It's a dictionary, so you can attach key/value pairs.
+
+Useful session methods:
+    * request.session['key']
+        - This will retrieve (get) the value stored in key
+    * request.session['key'] = 'value'
+        - Set the value that will be stored by key
+    * del request.session['key']
+        - Deletes a session key if it exists, throws a keyError if it doesn't.
+            Use along with try and except since it's better to ask for forgiveness than permission.
+    * 'key' in request.session
+        - Returns a boolean of whether a key is in session or not.
+    * {{ request.session.name }}
+        - Use dot notation (.) to access request.session keys from templates since square brackets
+            aren't allowed here.
+
+*** Session in Django gets saved even if we leave the browser! ***
+
+========================
+| Contextual Variables |
+========================
+
+Minimize use of request.session, limiting to just a few reference pieces such as name and ID of logged-in user.
+
+So we have to use contextual variables.
+What is context? It's just a dictionary that gets unpacked in the template, making all the keys variables that
+equal the corresponding value.
+
+Example:
+Django:
+        from django.shortcuts import render, HttpResponse, redirect
+        def index(request):
+        	context = {
+        		"email" : "blog@gmail.com",
+        		"name" : "mike"
+        	}
+        	return render(request, "second_app/index.html", context)
+
+In index.html, the context dictionary gets unpacked, and we have access to email and name.
+
+HTML:
+        <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Document</title>
+            </head>
+            <body>
+                <h1>Hello World!</h1>
+                {{email}} and {{name}}
+            </body>
+        </html>
+
+====================
+| Route Parameters |
+====================
+
+Passing variable via URL:
+In urls.py...
+        from django.conf.urls import url
+         from . import views
+         urlpatterns = [
+             url(r'^/en/(?P<id>\d+)$', views.show)
+         ]
+
+In views.py...
+        def show(request, id):
+         context = {
+           "id" : id
+         }
+         return render(request, "second_app/show.html", context)
+
+================
+| Static files |
+================
+
+Put static files in directory called "static" that lives alongside "templates". Just like with templates
+it's the convention to place another directory inside static with the same name as your app. That's
+because we could potentially be accessing multiple apps from within our own.
+
+To access static files from HTML:
+      <!-- Inside apps/first_app/templates/first_app/index.html -->
+      {% load staticfiles %}
+      <link rel="stylesheet" href="{% static 'first_app/css/styles.css' %}">
+      <script src="{% static 'first_app/js/main.js' %}" > </script>
+
+====================
+| Models in Django |
+====================
+
+Models in the MVC architecture are the workhorses of data manipulation.
+
+Across web frameworks such as the MEAN stack, Rails, and Django, the models file does two things:
+    * Gives information about what's inside the relevant SQL table
+    * Provides a location for the sort of validations we just talked about
+
+Example of app/first_app/models.py file:
+    from django.db import models
+    class People(models.Model):
+        first_name = models.CharField(max_length=38)
+        last_name = models.CharField(max_length= 38)
+        created_at = models.DateTimeField(auto_now_add=True)
+        updated_at = models.DateTimeField(auto_now=True)
+
+Now think back to your Flask days. Creating an ERD diagram didn't actually create the database
+table(s). We had to forward engineer the diagram into SQL code, and then run that SQL code in
+a MySQL environment. There's an analogous process in Django:
+    To do the equivalent of forward engineer we are going to run a couple of commands from the terminal.
+            python manage.py makemigrations
+            python manage.py migrate
+
+!!!!!!!!!
+Never delete migration files, and always makemigrations and migrate anytime you change something in
+your models.py files – that's what updates the actual database so it reflects what's in your models.
+!!!!!!!!!
+
+makemigrations : Look and see if there have been any changes to the models files in our apps. If so,
+                    create the code (using built-in Django methods) that represents those changes.
+migrate : FORWARD ENGINEER those changes into our database! (i.e. turn the code generated inside a
+            migration file into SQL commands and run those commands in local memory)
+
+For development, we are going to be using SQLite - a prepackaged SQL database that has much of the
+functionality of MySQL (but not all of it) and is stored as local memory.
+
+For deployment you'll have the option to use SQLite, but we'll also show you how to add a MySQL
+database, which you've already used with Flask.
+
+Example for views.py:
+        #in views.py
+        from django.shortcuts import render
+        #look inside models.py for people class
+        from .models import People
+        def index(request):
+            People.objects.create(first_name=“Mike”,last_name=“Hannon”)
+            people = People.objects.all()
+            print people
+            return render(request,”third_app/index.html”)
+
+=================
+| Django Models |
+=================
+Column Structure:
+In our model class:
+          from django.db import models
+          class ModelThing(models.Model):
+          #  column_name = models.Column_Type(optional_params)
+            first_name = models.CharField(max_length=30)
+
+All we did was set the column (named first_name) to be saved as the type of whatever
+we specified (CharField), and provided an optional parameter (max_length=30).
+
+Column Types:
+* CharField
+    Any text that a user may enter. This has one additional required parameter,
+    max_length, that (unsurprisingly) is the maximum length of text that can be saved.
+* TextField
+    Like a CharField, but with no maximum length. Your user could copy the entire text
+    of Atlas Shrugged into the field, and it would save in the database correctly.
+* IntegerField, BooleanField
+    Holds integers or booleans, respectively
+* DateTimeField
+    Used for date and times. This field can take two very useful optional parameters,
+    auto_now_add=True, which adds the current date/time when object is created, and
+    auto_now=True, which automatically updates any time the object is modified.
+* ForeignKey, ManyToManyField, OneToOneField
+    Used to indicate a relationship between models (anything that would require a
+    JOIN statement in SQL). ForeignKey is for one-to-many relationships and goes
+    in the model on the "many" side, just as the foreign key column goes in the
+    SQL table on the "many" side.
+
+================
+| ERD examples |
+================
+"One user can be associated with many posts":
+         # Inside models.py
+         from __future__ import unicode_literals
+         from django.db import models
+         # Create your models here.
+         class User(models.Model):
+             first_name = models.CharField(max_length=45)
+             last_name = models.CharField(max_length=45)
+             password = models.CharField(max_length=100)
+             created_at = models.DateTimeField(auto_now_add = True)
+             updated_at = models.DateTimeField(auto_now = True)
+         class Post(models.Model):
+             title = models.CharField(max_length=45)
+             message = models.TextField(max_length=1000)
+             # Notice the association made with ForeignKey for a one-to-many relationship
+             user_id = models.ForeignKey(User)
+             created_at = models.DateTimeField(auto_now_add = True)
+             updated_at = models.DateTimeField(auto_now = True)
+
+*** ForeignKey statement is the equivalent of the one-to-many relationship shown in the ERD diagram. ***
+
+====================
+| Database Queries |
+====================
+Django has a relatively easy to use Object Relationship Mapper (ORM) to help us make queries simply and cleanly.
+Django allows you to execute SQL queries directly. Hand-written SQL queries are actually faster than
+many ORMs. Django as to convert the ORM command into SQL, which adds a bit more overhead to the hand-written
+SQL queries for more complicated retrievals; others only use the ORM, accepting slight performance hit in
+exchange for being to write code in Python with Python syntax.
+
+The Object Relational Mapper (ORM):
+Django models come pre-equipped to communicate with your views via a method called 'objects'. 'objects' is an
+instance of the Django ORM class that does our DB communication.
+
+With the models.py file...
+    # Inside models.py
+    from __future__ import unicode_literals
+    from django.db import models
+    # Create your models here.
+    class User(models.Model):
+        first_name = models.CharField(max_length=45)
+        last_name = models.CharField(max_length=45)
+        password = models.CharField(max_length=100)
+        created_at = models.DateTimeField(auto_now_add = True)
+        updated_at = models.DateTimeField(auto_now = True)
+
+*NOTE: The following code will work great the first time you hit a route that calls the
+'index' function. But if you refresh the page, it crashes! Why? Follow the clues and alter
+the code below so it no longer breaks the server.
+With the views.py file...
+    # Inside your app's views.py file
+    from django.shortcuts import render, HttpResponse
+    # Pull the User class into the file
+    from .models import User
+    def index(request):
+        print(User.objects.all())
+        # A list of objects (or an empty list)
+        User.objects.create(first_name="mike",last_name="mike",password="1234asdf")
+        # Creates a user object
+        print(User.objects.all())
+        # A list of objects (or an empty list)
+        u = User.objects.get(id=1)
+        print(u.first_name)
+        u.first_name = "Joey"
+        u.save()
+        j = User.objects.get(id=1)
+        print(j.first_name)
+        # Gets the user with an id of 1, changes name and saves to DB, then retrieves again...
+        print(User.objects.get(first_name="mike"))
+        # Gets the user with a first_name of 'mike' *** THIS MIGHT NEED TO BE CHANGED ***
+        users = User.objects.raw("SELECT * from my_app_name_user")
+        # Uses raw SQL query to grab all users (equivalent to User.objects.all()), which we iterate through below
+        for user in users:
+          print user.first_name
+        return HttpResponse("ok")
+
+Know that this line:
+
+        print(User.objects.raw("SELECT * from my_app_name_user"))
+
+Relies on the fact that Django builds our database's tables according to a particular format
+( 'app_name' + _ + 'lowercase_model_name' ). If you're ever making a raw query and aren't sure what the table
+name is, you can always find it by printing the following:
+
+        User._meta.db_table
+
+-----------------
+For this section we'll use the following model:
+        class User(models.Model):
+          first_name = models.CharField(max_length=25)
+          last_name = models.CharField(max_length=25)
+          age = models.IntegerField()
+          created_at = models.DateTimeField(auto_now_add=True)
+          updated_at = models.DateTimeField(auto_now=True)
+          def __str__(self):
+            return self.first_name + " " + self.last_name
+
+** The method '__str__' converts User object into a string, so when I print these objects in the terminal
+they'll show as '<User: Firstname Lastname>' instead of '<User: User object>'.
+
+GET:
+.get(field="val") returns the one object that matches a given condition.
+If we wanted the one user with last name "Thomas", we could say:
+         user = User.objects.get(last_name="Thomas")
+         print("QUERY RESULT:", user)
+However, if the condition is true for more than item, or zero items, using .get will throw an error.
+Only use .get if you know that there's only one matching item! For this reason, this is a very good
+method to use with ID numbers.
+
+FILTER:
+.filter(field="val"...) returns all of the records where a given condition is true.
+Here's how we'd find all of the "Thomas"es:
+        user = User.objects.filter(last_name="Thomas")
+        print("QUERY RESULT:", user)
+What's the difference between .get and .filter? .get returns the object itself, while .filter
+returns a QuerySet (a special type of list that holds Django objects). Because it's returning
+a QuerySet and not an object, .filter has no problem if there's not exactly one matching record.
+
+EXCLUDE:
+.exclude(field="val"...) is the opposite of .filter: It returns all of the records where a given condition is false.
+Here's every user NOT surnamed "Thomas":
+        user = User.objects.exclude(last_name="Thomas")
+        print("QUERY RESULT:", user)
+*NOTE: It returns a QuerySet.
+
+CONDITIONS:
+You can do a more complicated search than just if a given field is equal to a given value.
+Instead of just passing in the field name as a keyword argument to .get, .filter, or .exclude,
+you'd pass the field name__lookup type (that's a double underscore, also known as a "dunder"
+for people on-the-go). For instance, to find users whose first name begins with "S":
+        user = User.objects.filter(first_name__startswith="S")
+        print("QUERY RESULT:", user)
+Every user older than 80:
+        user = User.objects.filter(age__gt=80)
+        print("QUERY RESULT:", user)
+Every user 80 or older (see the difference?):
+        user = User.objects.filter(age__gte=80)
+        print("QUERY RESULT:", user)
+
+CHAINING QUERIES:
+Queries can be chained together:
+        user = User.objects.filter(last_name__contains="o").exclude(first_name__contains="o")
+        print("QUERY RESULT:", user)
+
+        user = User.objects.filter(age__lt=70).filter(first_name__startswith="S")
+        print("QUERY RESULT:", user)
+If it's the same type of query, instead of being chained, you can pass multiple arguments to the function:
+        user = User.objects.filter(age__lt=70, first_name__startswith="S")
+        print("QUERY RESULT:", user)
+
+These are cases where the conditions are joined with AND, as in, all users younger than 70 AND whose
+first name starts with "S". If you want OR, as in users who are younger than 70 OR whose first_name
+starts with "S", you can use | (the set union operator):
+        user = User.objects.filter(age__lt=70)|User.objects.filter(first_name__startswith="S")
+        print("QUERY RESULT:", user)
+
+-----------------
+Displaying on Templates:
+How do we pass information from our view function into a template? With a context dictionary!
+
+...user_orm_example_project/apps/users/views.py
+        def index(request):
+          users = User.objects.filter(age__lt=70)|User.objects.filter(first_name__startswith="S")
+          context = {"users": users}
+          return render(request, "users/index.html", context)
+
+On the template, we can use a for-loop to go over this data.
+        <h1>Users</h1>
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Age</th>
+          </tr>
+          {% for user in users %}
+            <tr>
+              <td>{{user.id}}</td>
+              <td>{{user.first_name}}</td>
+              <td>{{user.last_name}}</td>
+              <td>{{user.age}}</td>
+            </tr>
+          {% endfor %}
+        </table>
+
+==========
+| BCRYPT |
+==========
+Bcrypt documentation explains how to generate an initial hashed password (shown below)
+as well as how to get a compare passwords!  In essence, Bcrypt can retrieve a salt
+from a Bcrypt encrypted string.
+
+Amazingly, the line before the exit in the snippet below prints out the same thing as hashed...
+        (djangoenv)>python
+        >>> import bcrypt
+        >>> password = "super secret password"
+        >>> hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+        >>> print hashed
+        >>> print len(hashed)
+        >>> hashed2 = bcrypt.hashpw(password, bcrypt.gensalt())
+        >>> print hashed2
+        >>> print bcrypt.hashpw(password,hashed)
+        >>> exit()
+
+Should you run into an encoding error when you’re hashing passwords with bcrypt,
+the following method might be useful:
+        +your_string.encode()
+
+=============================
+| Foreign Key Relationships |
+=============================
+To show a one-to-many relationship between models, Django uses a special field, ForeignKey.
+To create a record that has this foreign key relationship, you'd pass it into the create
+function, like with any other field:
+
+Ex:
+        this_author = Author.objects.get(id=2)
+        my_book = Book.objects.create(title="Little Women", author=this_author)
+        # or on one line...
+        my_book = Book.objects.create(title="Little Women", author=Author.objects.get(id=2))
+
+** Joins in Django happen automatically. If you have a book object, you don't need to run
+any additional query to get information about the author.
+
+You can search based off of a ForeignKey relationship.
+This code will find all of the books by the author with ID 2:
+        this_author = Author.objects.get(id=2)
+        books = Book.objects.filter(author=this_author)
+        # one-line version:
+        books = Book.objects.filter(author=Author.objects.get(id=2))
+        OR
+        books = Book.objects.filter(author__name="Louise May Alcott")
+        books = Book.objects.filter(author__name__startswith="Lou")
+
+Reverse Look-ups:
+You may have noticed that we haven't mentioned the related_name field yet. This is used
+for a reverse look-up. In addition to placing a field on our book that holds the author
+information, Django has also placed a field on the author that holds information about
+all of their books.
+
+Example:
+In views.py...
+        def index(request):
+          context = {"authors": Author.objects.all()}
+          return render(request, "books/index.html", context)
+In index.html...
+        <h1>Author List</h1>
+        <ul>
+          {% for author in authors %}
+            <li>{{author.name}}</li>
+              <ul>
+                {% for book in author.books.all %}
+                  <li><em>{{book.title}}</em></li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endfor %}
+        </ul>
+
+==============================
+| Many to Many Relationships |
+==============================
+You may remember that in order to use a many-to-many relationship in SQL,
+you had to construct a third, linking table with foreign key relationships
+to the two tables you wanted to connect. Django will do this for you automatically,
+if your model includes a ManyToManyField.
+
+Unlike with a ForeignKey, it doesn't matter which model has the ManyToManyField.
+The model would still work if the Book model has a field named publishers instead.
+
+Adding a relationship between two existing records is simple:
+        this_book = Book.objects.get(id=4)
+        this_publisher = Publisher.objects.get(id=2)
+        this_publisher.books.add(this_book)
+
+The syntax to see all books from a given publisher is the same as when doing a reverse
+look-up on a ForeignKey relationship: this_publisher.books.all() in your views.py, or
+this_publisher.books.all in a template.
+
+ManyToManyFields are automatically symmetrical. That is, by adding a book to a publisher,
+Django will also automatically add the publisher to the book. This means that we can add
+or look up from the other end without issue, assuming we've specified a related name so
+that Django knows how to refer to the field in the other model.
+this_book.publishers.add(this_publisher) is the same as this_publisher.books.add(this_book),
+and this_book.publishers.all() will return all publishers of a given book.
+
+================
+| Named Routes |
+================
+
+Named routes make referencing your Django app’s routes pretty easy. All we need to do is
+pass a keyword variable (name) to the url method we use inside our app’s urls.py file.
+
+For example:
+        # Inside your app's urls.py file
+        from django.conf.urls import url
+        from . import views
+        urlpatterns = [
+            url(r'^$', views.toindex, name = 'my_index'),
+            url(r'^this_app/new$', views.new, name = 'my_new'),
+            url(r'^this_app/(?P<id>\d+)/edit$', views.edit, name = 'my_edit'),
+            url(r'^this_app/(?P<id>\d+)/delete$', views.delete, name = 'my_delete'),
+            url(r'^this_app/(?P<id>\d+)$', views.show, name = 'my_show'),
+        ]
+...In the HTML...
+        <!-- Inside your app's index.html file -->
+        <a href="/target/this_app/new"></a>
+        <!-- is the equivalent of:  -->
+        <a href="{% url 'my_new' %}"></a>
+        <!-- This form's action attribute -->
+        <form class="" action="/target/this_app/5/delete" method="post">
+          <input type="submit" value="Submit">
+        </form>
+        <!-- is the equivalent of: -->
+        <form class="" action="{%url 'my_delete' id=5 %}" method="post">
+          <input type="submit" value="Submit">
+        </form>
+
+This is going to allow us to properly route things… but what about redirects
+from our views.py file? For that we need to pull in some added Django capability:
+        # Inside your app's views.py file
+        from django.core.urlresolvers import reverse
+
+Ex:
+        # Still inside your app's views.py file
+        from django.shortcuts import render, HttpResponse, redirect
+        from django.core.urlresolvers import reverse
+        # Create your views here.
+        # Example of an old index method:
+        def index(request):
+            print("hello, I am your first request")
+            return redirect('/target/this_app/new')
+        # Can be transformed to the following:
+        def index(request):
+           print("hello, I am your first request")
+           return redirect(reverse('my_new'))
+
+But what if we're using routes with the same names in different apps?
+How can our project tell the difference? The answer is to add a namespace
+argument to the routes you include in your project's urls.py file.
+
+Ex:
+        #Inside your main urls.py file
+        urlpatterns = [
+            url(r'^accounts/', include('apps.login_reg_app.urls', namespace='users')),
+            url(r'^courses/', include('apps.courses_app.urls', namespace='courses')),
+        ]
+...In HTML...
+        <!-- Inside a Django template (.html) -->
+        <a href="{% url 'courses:index' %}">This link will hit the index route in your courses_app</a>
+        <a href="{% url 'users:index' %}">And this link will hit the index route in your login_reg_app</a>
+
+You can use the named routes of any app in a  views.py file adopting giving the
+same colon-separated string to your reverse method, which figures out the actual
+route based on the name:
+        #In a views.py method
+        return redirect(reverse('users:new'))
+
+What about filling in route parameters like id for routes that need them (such as show?).
+In your template, it's the same as before. In a views.py file, you'll need to pass in the
+correct keyword argument (kwarg) to your reverse function.
+        #In a views.py method
+        return redirect(reverse('users:show', kwargs={'id': your_id_variable }))
+
+=================
+| Multiple Apps |
+=================
+Let’s say we wanted to have a single project containing all of the awesome mini-apps that we’ve built so far.
+First, we need to add the relevant apps to your settings.py file (and potentially put them in your apps
+folder). Plenty of people forget this step when they’re first starting out! Next, we need some way to
+direct HTTP requests from the browser to the correct routing file:
+...current main urls.py...
+        # Inside your main project's urls.py file
+        urlpatterns = [
+          url(r'^', include('apps.current_project'))
+        ]
+...transform into this...
+        urlpatterns = [
+            url(r'^', include('apps.first_app.urls')),
+            url(r'^time-display/', include('apps.time_display.urls')),
+            url(r'^rand-word/', include('apps.random_word.urls')),
+            url(r'^ninjas/', include('apps.disappearing_ninja.urls')),
+            url(r'^ninja-gold/', include('apps.ninja_gold.urls')),
+            url(r'^courses/', include('apps.courses.urls'))
+        ]
+
+**Some things to note: All of the routes, except the first one, have a match with '/' at the end of the
+pattern. That means that by traveling to localhost:8000/ninjas/, our disappearing_ninja app’s urls.py
+file would take over (receiving an empty string) and potentially load all of your ninjas!
+
+One last thing to note: You can pull in an app and use a model from that app in another app!
+Let’s say I added an mh_user app, which is my fully customized login and registration, to my project.
+In my quotes app, I could go into my model (or anywhere in my project for that matter) and add:
+        # From inside one of your app's models.py file
+        from '''Relative Path to ourOtherApps models.py file''' import User
+
+This relative path is often ..nameofapp.models. The .. says go up one folder from where you are
+currently sitting. (User is accessible because we added the app generating User to our main
+project’s settings.py file.)

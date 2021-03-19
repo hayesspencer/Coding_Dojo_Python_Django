@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+</head>
+<body>  
+    <h1>Main Page</h1> 
+   <h2>Welcome {{current_user.name}}</h2>
+   <a href="/logout">Logout</a>
+   <h1>Submit a Giraffe</h1>
+   {% if messages %}
+   <ul class="messages">    
+        {% for message in messages %}    
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>    
+        % endfor %}
+    </ul>
+    {% endif %}
+    <form action="/giraffes/create" method="POST">
+    {% csrf_token %}
+    <label for="">Name <input type="text" name="giraffe_name"></label>
+    <label for="">Catchphrase <input type="text" name="catchphrase"></label>
+    <input type="submit" value="Submit Giraffe">
+</form>
+<h1>Giraffes You Own</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Catchphrase</th>
+            <th>Owner</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for one_giraffe in current_user.giraffes_owned.all %}
+        <tr>
+            <td>{{one_giraffe.name}}</td>
+            <td>{{one_giraffe.catchphrase</td>
+            <td>{{one_giraffe.owner.name}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h1>Giraffes You Don't Own</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Catchphrase</th>
+            <th>Owner</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for one_giraffe in all_giraffes %}
+            {% if one_giraffe.owner.id != cureent_user.id %}
+            <tr>
+                <td>{{one_giraffe.name}}</td>
+                <td>{{one_giraffe.catchphrase</td>
+                <td>{{one_giraffe.owner.name}}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

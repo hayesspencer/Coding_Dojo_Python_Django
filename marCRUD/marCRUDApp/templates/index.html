@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- {% load static %}
+    <link rel="stylesheet" href= "{% static 'style.css' %}?{% now 'U' %}"> -->
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+<!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <title></title>
+</head>
+<body>
+    <h1>Abbey's Chickens</h1>
+    <form action="/chickens/create" method="POST">
+        {% csrf_token %} 
+        <label>Name: <input type="text" class="form-control" name="chicken_name"></label><br>
+        <label>Color: <input type="text" class="form-control" name="color"></label><br>
+        <button type="submit" class="btn btn-primary">Create Chicken</button>
+    </form><br>
+    <table class="table">
+        <thead>
+            <tr class="table">
+                <th>Name</th>
+                <th>Color</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chicken in all_chickens %}
+                <tr>
+                    <td>{{ chicken.name }}</td>
+                    <td>{{ chicken.color }}</td>
+                    <td>
+                        <a href="/chickens/{{chicken.id}}">Show</a> 
+                        <form action="/chickens/{{chicken.id}}/destroy" method="POST">
+                            {% csrf_token %}
+                            <input type="submit" value="Delete">
+                        </form>
+                        <a href="/chickens/{{chicken.id}}/edit">Edit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if messages %}
+    <ul>    
+        {% for message in messages %}    
+            <li>{{ message }}</li>    
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>

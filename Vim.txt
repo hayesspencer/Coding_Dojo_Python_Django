@@ -1,0 +1,18 @@
+VIM
+Objectives:
+Learn about VIM, a text editor for Unix
+Learn a few basic commands for VIM
+If you have used VIM before, skip to the next tab.
+
+VIM is a terminal based file editor. We will use it to change the necessary files in order to get our project running. In the following instructions, you'll be using the vim command to enter the editor. The vim command can be used either to:
+
+edit existing files, or
+create and open a new blank file.
+Because there is no GUI (graphical user interface), it's important to learn a few keyboard commands for navigating around VIM:
+
+i - enter INSERT mode. You should see –INSERT– at the bottom left corner of your terminal. Now use your arrow keys to move the cursor to where you want to edit and make your changes.
+esc - exit INSERT mode.
+: - when not in INSERT mode, enters the vim command interface. You should now see a colon at the bottom left corner of your terminal.
+w and Enter - save.
+wq and Enter - save and quit.
+q! and Enter - quit without saving.

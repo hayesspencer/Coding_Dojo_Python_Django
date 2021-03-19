@@ -1,0 +1,11 @@
+#home {
+  display: flex;
+  justify-content: space-between;
+}
+#home > * {
+  width: 50%;
+  margin: 0 3em;
+}
+body > h1 {
+  text-align: center;
+}

@@ -1,0 +1,8 @@
+User.objects.create
+User.objects.all()
+User.objects.last()
+User.objects.first()
+User.objects.save()
+User.objects.delete()
+User.objects.order_by('first_name')
+User.objects.order_by('-first_name')

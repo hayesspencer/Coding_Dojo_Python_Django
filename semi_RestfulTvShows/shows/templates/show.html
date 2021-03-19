@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}?{% now 'U' %}">
+</head>
+<body>
+    <h1>TV Show #{{ show.id}}</h1>
+    <h4>Title</h4>
+    <p>{{ show.title }}</p>
+    <h4>Network</h4>
+    <p>{{ show.network }}</p>
+    <h4>Release Date</h4>
+    <p>{{ show.release_date }}</p>
+    <h4>Description</h4>
+    <p>{{ show.description }}</p>
+    <h4>Last Updated</h4>
+    <p>{{ show.updated_at }}</p>
+    <a href="/shows/{{ show.id }}/edit">Edit</a> | <a href="/shows/{{ show.id }}/delete">Delete</a>
+</body>
+</html>

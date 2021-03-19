@@ -1,0 +1,5 @@
+To use the shell, we'll run the following command in our terminal from our project's root directory (where our manage.py file is located):
+> python manage.py shell
+
+Once we're in the shell, we can access all of our functions and classes in our files. To do so, we just need to specify which modules (files) we need. Since we are interested specifically in working with our models, let's import them:
+>>> from your_app_name_here.models import *

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href= "{% static 'style.css' %}?{% now 'U' %}">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+<!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <title>Dojos & Ninjas</title>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="left">
+            <section>
+                <h3>Add a Dojo</h3>
+                <form action="/dojos/create" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" name="city" id="city" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" name="state" id="state" class="form-control">
+                    </div>
+                    <button class="btn btn-primary">Add</button>
+                </form>
+            </section>
+            <section>
+                <h3>Add a Ninja</h3>
+                <form action="/ninjas/create" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" name="first_name" id="first_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" name="last_name" id="last_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="dojo">Dojo</label>
+                        <select name="dojo" id="dojo" class="form-control">
+                        {% for dojo in dojos %}
+                            <option value="{{ dojo.id }}">{{ dojo.name }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-primary">Add</button>
+                </form>
+            </section>
+        </div>
+        <div id="right">
+            <h1>All the Dojos</h1>
+            {% for dojo in dojos %}
+                <h3>Ninjas at the {{ dojo.name }}</h3>
+                <ul>
+                {% for ninja in dojo.ninjas.all %}
+                    <li>{{ ninja.first_name }} {{ ninja.last_name }}</li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
+
+<!-- {% for i in values %}
+    <form method="POST">
+        {% csrf_token %}
+        <p>{{ forloop.counter }}: {{ i.0 }}<button type="submit" name="delete_items" value="{{ obj.pk}}"></button>
+
+        </p>
+        <!-- <p>{{ i.1 }}</p> -->
+    </form>
+{% endfor %} -->
+        </div>
+    </div>
+</body>
+</html>

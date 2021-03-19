@@ -1,0 +1,67 @@
+* {
+  font-family: "arial", monospace;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+}
+header button {
+  padding: 1.2em;
+  font-size: 1.3rem;
+}
+
+h3 {
+  padding-inline: 423px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+  color: rgb(255, 238, 0);
+}
+h1 {
+  font-size: 2rem;
+  padding-inline: 60px;
+  text-shadow: 2px 2px 2px black;
+}
+body {
+  padding: 2em;
+  background-color: #0c0c0c;
+}
+.earn {
+  color: #77fa77;
+}
+.lose {
+  color: #f27a7a;
+}
+#buildings {
+  display: flex;
+  justify-content: space-between;
+}
+h1,
+#buildings h3 {
+  margin: 0;
+}
+#buildings * {
+  font-size: 1rem;
+}
+#buildings > div {
+  width: 19%;
+  height: 10rem;
+  padding: 2em;
+  border: solid black 2px;
+  border-radius: 65px;
+}
+#activities {
+  height: 12rem;
+  overflow-y: scroll;
+  border: solid;
+  padding: 1rem;
+  border-radius: 65px;
+}
+#activities p {
+  margin-top: 0;
+}

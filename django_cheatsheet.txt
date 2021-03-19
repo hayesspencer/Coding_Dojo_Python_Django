@@ -1,0 +1,25 @@
+DJANGO CHEAT SHEET:
+
+1. Create project:
+
+    django-admin startproject projectName
+2.  cd projectName
+3.  mkdir apps
+4.  cd apps
+5.  nul> __init__.py
+6.  python ../manage.py startapp appName
+
+7. Add app to list in settings.py of projectName
+8. Go to urls.py of projectName and add routes to get from appName
+9. Add urls.py to appName folder
+10. Import views into appName/urls.py
+11. Modify urlpatterns: check regex search and which page to render in views
+12. Go to views.py and add view to be rendered
+13. Create file (and folders) in appName: /templates/appName/index.html
+14. Go back to folder that holds manage.py and runserver
+
+-------------------------
+Set up to use session:
+In terminal, go to where manage.py is...
+        python manage.py makemigrations
+        python manage.py migrate

@@ -1,0 +1,38 @@
+https://cli.github.com/manual/
+
+GitHub CLI
+gh is GitHub on the command line. It brings pull requests, issues, and other GitHub concepts to the terminal next to where you are already working with git and your code.
+
+Installation
+You can find installation instructions on our README.
+
+Authentication
+Run gh auth login to authenticate with your GitHub account. gh will respect tokens set using GITHUB_TOKEN.
+
+GitHub Enterprise Server
+GitHub CLI supports GHES 2.20 and above. To authenticate with a GitHub Enterprise instance, run:
+
+gh auth login --hostname <hostname>
+You will be prompted to either authenticate using your browser, or to paste a token.
+
+Setting an editor
+To set your preferred editor, you can use gh config set editor <editor>. Read more about gh config.
+
+Additionally if the above is not set, for macOS and Linux, gh will respect editor environment variables based on your OS and shell setup.
+
+On macOS and Linux, the default editor is Nano. On Windows, the default editor is Notepad.
+
+Setting your git protocol
+To set your preferred git protocol, you can use gh config set git_protocol { ssh | https }. Read more about gh config.
+
+Disable interactivity
+To disable interactive prompts, you can use gh config set prompt disabled. Read more about gh config.
+
+Extending the CLI
+There are several ways you can make gh your own.
+
+Create shorthands using gh alias set
+Make custom API queries using gh api
+Use environment variables
+Feedback
+Thank you for checking out GitHub CLI! Please open an issue to send us feedback. We're looking forward to hearing it.
