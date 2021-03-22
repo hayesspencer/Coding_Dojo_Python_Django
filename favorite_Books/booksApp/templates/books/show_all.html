@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Show All</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Favorite Books</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto"></ul>
+                <span class="navbar-text">
+                    Welcome, {{request.session.greeting}} </a> <a href="/logout" role="button"
+                        class="btn btn-sm btn-info ml-2 text-white">Logout</a>
+                </span>
+            </div>
+        </div>
+    </nav><!-- /NAVBAR -->
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <div class="row">
+            <div class="col-6 px-2">
+                <h3>Add Book</h3>
+                
+                <form action="/books/create" method="post">
+                    {% csrf_token %}
+                    {% for message in messages %}
+                        <p class="text-danger small">{{ message }}</p>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" name="title">
+                        
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" class="form-control" name="description">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="col-6 px-2">
+                <h3>Favorited Books</h3>
+                {% for book in all_books %}
+                {% if this_user in book.favorited_by.all %}
+                <div class="container">
+                    <h5><a href="/books/{{book.id}}">{{book.title}}</a></h5>
+                    <p>(added by {{book.creator.first_name}} {{book.creator.last_name}})</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+                <h3>Other Books</h3>
+                {% for book in all_books %}
+                {% if this_user not in book.favorited_by.all %}
+                <div class="container">
+                    <h5><a href="/books/{{book.id}}">{{book.title}}</a></h5>
+                    <p>(added by {{book.creator.first_name}} {{book.creator.last_name}})</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div><!-- /MAIN CONTENT -->
+</body>
+
+</html>
