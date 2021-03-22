@@ -6,7 +6,7 @@
     <title>Login/Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}?{% now 'U' %}">
 </head>
 <body>
     <h1>Login/Registration</h1>
@@ -24,11 +24,11 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="first_name">First Name</label>
-                    <input type="text" name="first_name" id="first_name" class="form-control">
+                    <input type="text" name="fname" id="fname" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="last_name">Last Name</label>
-                    <input type="text" name="last_name" id="last_name" class="form-control">
+                    <input type="text" name="lname" id="lname" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -36,18 +36,18 @@
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" class="form-control">
+                    <input type="password" name="pw" id="password" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="confirm">Confirm Password</label>
-                    <input type="password" name="confirm" id="confirm" class="form-control">
+                    <input type="password" name="confpw" id="confirm" class="form-control">
                 </div>
-                <button class="btn btn-primary">Register</button>
+                <button class="btn btn-primary">Create User</button>
             </form>
         </section>
         <section>
             <h2>Login</h2>
-            <form action="/login" method="post">
+            <form action="/login" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" class="form-control">
+                    <input type="password" name="pw" id="password" class="form-control">
                 </div>
                 
                 <button class="btn btn-success">Login</button>

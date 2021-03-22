@@ -6,15 +6,43 @@
     <title>Login/Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}?{% now 'U' %}">
 </head>
 <body>
-    <h1>Success! Welcome, {{ user.first_name }}!</h1>
-    <ul class="messages">
-        {% for message in messages %}
-        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    <a href="/logout">Log Out</a>
+    <div id='wrap'>
+        <a href="/logout">Logout</a>
+        <h1>Welcome to {{request.session.user}}'s Wall!</h1>
+
+        <div id='write'>
+            <h2>Write a Post:</h2>
+            <form action="/process_message" method=POST>
+                {% csrf_token %}
+                <input type="text" name='mess'>
+                <input type="submit" value="Post">
+            </form>
+        </div>
+
+        <div id='posts'>
+            {% for post in wall_messages %}
+            <div class='one_post'>
+                <p class='post'>{{post.message}}</p>
+                <p class='poster'>By: <a href="/user_profile/{{post.poster.id}}">{{post.poster.first_name}} {{post.poster.last_name}}</a></p>
+                <a href="/like/{{post.id}}">Like Post</a>
+                <p>{{ post.user_likes.count }}</p>
+                <form action="/add_comment/{{post.id}}" method=POST>
+                    {% csrf_token %}
+                    Comment: <input type="text" name='comment'>
+                    <input type="submit" value='submit'>
+                </form>
+                {% for comment in post.post_comments.all %}
+                    <p>{{comment.comment}}</p>
+                    <p>poster: {{comment.poster.first_name}} {{comment.poster.last_name}}</p>
+                    <a href="/delete/{{comment.id}}">Delete</a>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
 </body>
 </html>
